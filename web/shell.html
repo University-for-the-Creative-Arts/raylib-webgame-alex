@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="EN-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <title>raylib web game</title>
+
+    <meta name="title" content="raylib web game">
+    <meta name="description" content="New raylib web videogame, developed using raylib videogames library">
+    <meta name="keywords" content="raylib, programming, examples, html5, C, C++, library, learn, games, videogames">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Open Graph metatags for sharing -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="raylib web game">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image" content="https://www.raylib.com/common/raylib_logo.png">
+    <meta property="og:image:alt" content="New raylib web videogame, developed using raylib videogames library" />
+    <meta property="og:site_name" content="raylib - example">
+    <meta property="og:url" content="https://www.raylib.com/games.html">
+    <meta property="og:description" content="New raylib web videogame, developed using raylib videogames library">
+
+    <!-- Twitter metatags for sharing -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@raysan5">
+    <meta name="twitter:title" content="raylib web game">
+    <meta name="twitter:image" content="https://www.raylib.com/common/raylib_logo.png">
+    <meta name="twitter:image:alt" content="New raylib web videogame, developed using raylib videogames library">
+    <meta name="twitter:url" content="https://www.raylib.com/games.html">
+    <meta name="twitter:description" content="New raylib web videogame, developed using raylib videogames library">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="https://www.raylib.com/favicon.ico">
+
+    <!-- Centre the canvas -->
+    <style>
+      html, body { height: 100%; margin: 0; background: #000; }
+      .page {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+      }
+      canvas.emscripten { border: 0; background-color: #000; }
+      #output { display: none; } /* keep the default output hidden */
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/gh/eligrey/FileSaver.js/dist/FileSaver.min.js"></script>
+    <script>
+      function saveFileFromMEMFSToDisk(memoryFSname, localFSname) {
+        var data = FS.readFile(memoryFSname);
+        var blob = new Blob([data.buffer], { type: "application/octet-binary" });
+        saveAs(blob, localFSname);
+      }
+
+      /* --- Weather mapping (Open-Meteo WMO → game kind)
+         0 = clear (SUNNY)
+         1,2,3,45,48 = cloudy/fog (CLOUDY)
+         everything else = RAINY */
+      function mapWmoToKind(code) {
+        if (code === 0) return 0;                  // SUNNY
+        if ([1,2,3,45,48].includes(code)) return 1; // CLOUDY
+        return 2;                                   // RAINY default
+      }
+
+      function fetchWeatherAndSend() {
+        const url = "https://api.open-meteo.com/v1/forecast?latitude=51.5072&longitude=-0.1276&current_weather=true";
+        fetch(url)
+          .then(r => r.json())
+          .then(j => {
+            const code = j?.current_weather?.weathercode;
+            const kind = mapWmoToKind(typeof code === "number" ? code : 1);
+            console.log("[Weather] WMO:", code, "→ kind:", kind);
+            if (typeof Module !== 'undefined' && Module.ccall) {
+              Module.ccall("SetWeather", null, ["number"], [kind]);
+            }
+          })
+          .catch(err => {
+            console.warn("[Weather] fetch failed:", err);
+            if (typeof Module !== 'undefined' && Module.ccall) {
+              Module.ccall("SetWeather", null, ["number"], [1]); // CLOUDY fallback
+            }
+          });
+      }
+    </script>
+  </head>
+
+  <body>
+    <div class="page">
+      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+    </div>
+    <p id="output"></p>
+
+    <script>
+      // IMPORTANT: Define Module *after* the canvas exists
+      var Module = {
+        print: (function () {
+          var element = document.getElementById('output');
+          if (element) element.value = '';
+          return function (text) {
+            if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+            console.log(text);
+            if (element) { element.value += text + "\n"; element.scrollTop = element.scrollHeight; }
+          };
+        })(),
+        canvas: (function () { return document.getElementById('canvas'); })(),
+        onRuntimeInitialized: function () {
+          console.log("[Weather] onRuntimeInitialized");
+          fetchWeatherAndSend();
+        }
+      };
+    </script>
+
+    <!-- Emscripten inserts generated JS here -->
+    {{{ SCRIPT }}}
+  </body>
+</html>
+
