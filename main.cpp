@@ -134,7 +134,7 @@ int main() {
 
     const int ENEMY_COUNT = 10;          // how many enemies to manage
 
-    // Initialize the first run (even though start is MENU, this sets baseline)
+    // Initialise the first run (even though start is MENU, this sets baseline)
     ResetGame(player, enemies, ENEMY_COUNT, score);
 
     // -------------------------------------------------------------------------------------
