@@ -3,7 +3,7 @@
 *
 * GOAL
 *   - Move the player (green rounded square) with WASD/Arrow Keys
-*   - Avoid the falling red blocks
+*   - Avoid the falling objects
 *   - Score increases the longer you survive
 *
 * CONTROLS
