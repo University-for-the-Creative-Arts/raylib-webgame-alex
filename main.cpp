@@ -20,12 +20,10 @@
 
 #include "raylib.h"
 #include <vector>
-#include <string>
+//#include <string>
 #include <cmath>
 
-// --- : standard headers used by web bridge 
-#include <cstdlib>
-#include <cstring>
+
 
 // --- : Weather bridge (lets JS set the current weather) -----------------
 enum class WeatherKind { SUNNY = 0, CLOUDY = 1, RAINY = 2 };
