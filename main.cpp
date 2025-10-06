@@ -23,7 +23,7 @@
 #include <string>
 #include <cmath>
 
-// --- : standard headers used by tiny web bridge (safe on desktop too)
+// --- : standard headers used by web bridge 
 #include <cstdlib>
 #include <cstring>
 
